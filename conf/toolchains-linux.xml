@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF8"?>
+<toolchains>
+
+    <!-- JDK toolchains -->
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>1.8</version>
+            <vendor>OpenJDK</vendor>
+            <os>linux</os>
+        </provides>
+        <configuration>
+            <jdkHome>/home/tom/.sdkman/candidates/java/8.0.265.hs-adpt</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>11</version>
+            <vendor>OpenJDK</vendor>
+            <os>Linux</os>
+        </provides>
+        <configuration>
+            <jdkHome>/home/tom/.sdkman/candidates/java/11.0.8.hs-adpt</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>15</version>
+            <vendor>OpenJDK</vendor>
+            <os>Linux</os>
+        </provides>
+        <configuration>
+            <jdkHome>/home/tom/.sdkman/candidates/java/15.0.0.hs-adpt</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>16-loom</version>
+            <vendor>OpenJDK</vendor>
+            <os>Linux</os>
+        </provides>
+        <configuration>
+            <jdkHome>/usr/lib/jvm/jdk-16-loom</jdkHome>
+        </configuration>
+    </toolchain>
+</toolchains>

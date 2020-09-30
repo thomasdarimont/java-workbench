@@ -1,6 +1,6 @@
 package wb.java15;
 
-public class MainJava15 {
+class MainJava15 {
 
     public static void main(String[] args) {
 

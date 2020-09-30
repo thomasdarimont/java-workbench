@@ -1,32 +1,36 @@
 package wb.java16loom;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 class VirtualThreadsDemo {
 
     public static void main(String[] args) {
 
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        var executorService = Executors.newFixedThreadPool(2);
 
-        Thread.Builder virtualThreadBuilder = Thread.builder().name("demo-thread", 1).virtual(executorService);
+        var threadBuilder = Thread.builder()
+                .name("demo-thread", 1)
+                .virtual(executorService)
+                .task(VirtualThreadsDemo::task);
+
         for (int i = 0; i < 10; i++) {
-            Thread thread = virtualThreadBuilder.task(() -> {
+            threadBuilder.build().start();
+        }
+    }
 
-                System.out.printf("Started %s%n", Thread.currentThread().getName());
+    static void task() {
 
-                int iters = 0;
-                while (!Thread.currentThread().isInterrupted()) {
-                    iters++;
+        System.out.printf("Started %s%n", Thread.currentThread().getName());
 
-                    if (iters % 10000 == 0) {
-                        System.out.printf("Running in %s%n", Thread.currentThread().getName());
-                    }
-                    Thread.yield();
-                }
-            }).build();
+        int iters = 0;
+        while (!Thread.currentThread().isInterrupted()) {
+            iters++;
 
-            thread.start();
+            if (iters % 10000 == 0) {
+                System.out.printf("Running in %s%n", Thread.currentThread().getName());
+            }
+
+            Thread.yield();
         }
     }
 }

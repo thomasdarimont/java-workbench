@@ -1,3 +1,3 @@
 @echo off
 
-mvn --global-toolchains conf\toolchains.xml clean verify
+mvn --global-toolchains conf\toolchains-windows.xml clean verify
