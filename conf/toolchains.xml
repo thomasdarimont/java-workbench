@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF8"?>
+<toolchains>
+
+    <!-- JDK toolchains -->
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>1.8</version>
+            <vendor>OpenJDK</vendor>
+            <os>Windows 10</os>
+        </provides>
+        <configuration>
+            <jdkHome>/Program Files/OpenJDK/jdk-8</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>11</version>
+            <vendor>OpenJDK</vendor>
+            <os>Windows 10</os>
+        </provides>
+        <configuration>
+            <jdkHome>/Program Files/OpenJDK/jdk-11</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>15</version>
+            <vendor>OpenJDK</vendor>
+            <os>Windows 10</os>
+        </provides>
+        <configuration>
+            <jdkHome>/Program Files/OpenJDK/jdk-15</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>16-loom</version>
+            <vendor>OpenJDK</vendor>
+            <os>Windows 10</os>
+        </provides>
+        <configuration>
+            <jdkHome>/Program Files/OpenJDK/jdk-16-loom</jdkHome>
+        </configuration>
+    </toolchain>
+</toolchains>
