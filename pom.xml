@@ -66,16 +66,30 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
-
-                    <configuration>
-                        <argLine>--illegal-access=permit</argLine>
-                        <argLine>--enable-preview</argLine>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${java.version}</release>
+                    <compilerArgs>--enable-preview</compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>--illegal-access=permit</argLine>
+                    <argLine>--enable-preview</argLine>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-toolchains-plugin</artifactId>
@@ -90,7 +104,7 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <version>15</version>
+                            <version>${java.version}</version>
                             <vendor>OpenJDK</vendor>
                             <os>${os.name}</os>
                         </jdk>

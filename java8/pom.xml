@@ -20,7 +20,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
+                <configuration combine.self="override">
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
@@ -29,23 +29,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-
-                <configuration>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-toolchains-plugin</artifactId>
-                <configuration>
-                    <toolchains>
-                        <jdk>
-                            <version>${java.version}</version>
-                            <vendor>OpenJDK</vendor>
-                            <os>${os.name}</os>
-                        </jdk>
-                    </toolchains>
+                <configuration combine.self="override">
                 </configuration>
             </plugin>
         </plugins>
