@@ -18,6 +18,7 @@
 
         <!-- Library experiments -->
         <module>lib-graalvm-js</module>
+        <module>lib-jabel</module>
     </modules>
 
     <properties>
@@ -81,7 +82,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>${java.version}</release>
-                    <compilerArgs>--enable-preview</compilerArgs>
+<!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
                 </configuration>
             </plugin>
 
