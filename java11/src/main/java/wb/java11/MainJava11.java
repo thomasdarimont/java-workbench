@@ -4,6 +4,6 @@ class MainJava11 {
 
     public static void main(String[] args) {
 
-        System.out.println("Hello from Java 11");
+        System.out.printf("Hello from Java %s%n", System.getProperty("java.version"));
     }
 }
