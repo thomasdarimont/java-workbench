@@ -50,4 +50,19 @@
         </configuration>
     </toolchain>
 
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>20-CE</version>
+            <vendor>GraalVM</vendor>
+            <os>Windows 10</os>
+        </provides>
+        <configuration>
+            <!--
+            Install native-image support via
+            C:\Program Files\OpenJDK\graalvm-ce-java11-20.2.0>bin\gu.cmd install native-image
+            -->
+            <jdkHome>/Program Files/OpenJDK/graalvm-ce-java11-20.2.0</jdkHome>
+        </configuration>
+    </toolchain>
 </toolchains>
