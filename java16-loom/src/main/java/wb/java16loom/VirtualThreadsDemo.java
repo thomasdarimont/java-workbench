@@ -10,11 +10,7 @@ class VirtualThreadsDemo {
 
         int carrierThreads = 2;
 
-        var executorService = Executors.newFixedThreadPool(carrierThreads, r -> {
-            Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            return thread;
-        });
+        var executorService = Executors.newFixedThreadPool(carrierThreads);
 
         int nTasks = 10;
         CountDownLatch cdl = new CountDownLatch(nTasks);
@@ -22,14 +18,17 @@ class VirtualThreadsDemo {
         Runnable task = () -> VirtualThreadsDemo.sleep(cdl);
 
         var threadBuilder = Thread.builder()
-                .name("demo-thread-", 1)
-                .daemon(true)
-                .virtual(executorService)
-                .task(task);
+                .name("virtual-thread-", 1)
+                .virtual(executorService);
+
+        boolean useVirtualThreads = true;
 
         for (int i = 0; i < nTasks; i++) {
-            threadBuilder.build().start();
-//            executorService.execute(task);
+            if (useVirtualThreads) {
+                threadBuilder.task(task).build().start();
+            } else {
+                executorService.execute(task);
+            }
         }
 
         System.out.println("Waiting for task completion");
