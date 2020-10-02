@@ -35,6 +35,25 @@ class TableDrivenTest {
                 .map(tc -> DynamicTest.dynamicTest(tc.name(), tc::check));
     }
 
+    @TestFactory
+    Stream<DynamicTest> tableDrivenTestFromStream() {
+
+        record TestCase(String name, int a, int b, int sum) {
+
+            public void check() {
+                assertEquals(sum, a + b, name);
+            }
+        }
+
+        var testCases = List.of(
+                new TestCase("test1", 1, 2, 3),
+                new TestCase("test2", 2, 2, 4),
+                new TestCase("test3", 4, 2, 6)
+        ).stream();
+
+        return DynamicTest.stream(testCases, TestCase::name, TestCase::check);
+    }
+
 
     @TestFactory
     Stream<DynamicTest> tableDrivenTestFromAnnotations() {
