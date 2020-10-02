@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
@@ -45,13 +46,13 @@ class TableDrivenTest {
             }
         }
 
-        var testCases = List.of(
+        var testCases = Stream.of(
                 new TestCase("test1", 1, 2, 3),
                 new TestCase("test2", 2, 2, 4),
                 new TestCase("test3", 4, 2, 6)
         );
 
-        return DynamicTest.stream(testCases.stream(), TestCase::name, TestCase::check);
+        return DynamicTest.stream(testCases, TestCase::name, TestCase::check);
     }
 
 
@@ -98,7 +99,7 @@ class TableDrivenTest {
             DisplayName displayName = m.getAnnotation(DisplayName.class);
             String testName = m.getName();
             if (displayName != null) {
-                testName = renderName(displayName.value(), record, recordComponents);
+                testName = renderNameFromRecordComponents(displayName.value(), record, recordComponents);
             }
 
             dynamicTests.add(DynamicTest.dynamicTest(testName, () -> m.invoke(record)));
@@ -108,7 +109,7 @@ class TableDrivenTest {
         return dynamicTests.stream();
     }
 
-    private static String renderName(String value, Object record, RecordComponent[] recordComponents) {
+    private static String renderNameFromRecordComponents(String value, Object record, RecordComponent[] recordComponents) {
         String name = value;
         for (RecordComponent rc : recordComponents) {
             Object result = null;
@@ -123,30 +124,57 @@ class TableDrivenTest {
     }
 
 
-//    @TestFactory
-//    Stream<DynamicTest> tableDrivenTestFromAnnotationsStreamlined() {
-//
-//        record TestCase(String name, int a, int b, int sum, int diff) {
-//
-//            @Test
-//            @DisplayName("${name}: ${a} + ${b} = ${sum}")
-//            public void plus() {
-//                assertEquals(sum, a + b, name);
-//            }
-//
-//            @Test
-//            @DisplayName("${name}: ${a} - ${b} = ${diff}")
-//            public void minus() {
-//                assertEquals(diff, a - b, name);
-//            }
-//        }
-//
-//        var testCases = List.of(
-//                new TestCase("test1", 1, 2, 3, -1),
-//                new TestCase("test2", 2, 2, 4, 11),
-//                new TestCase("test3", 4, 2, 6, 13)
-//        );
-//
-//        return DynamicTest.stream(testCases.stream(),/* dynamic name generation */, /* test execution */ );
-//    }
+    @TestFactory
+    Stream<DynamicTest> tableDrivenTestFromAnnotationsStreamed() {
+
+        record TestCase(String name, int a, int b, int sum, int diff) {
+
+            @Test
+            @DisplayName("${name}: ${a} + ${b} = ${sum}")
+            public void plus() {
+                assertEquals(sum, a + b, name);
+            }
+
+            @Test
+            @DisplayName("${name}: ${a} - ${b} = ${diff}")
+            public void minus() {
+                assertEquals(diff, a - b, name);
+            }
+        }
+
+        var testCases = Stream.of(
+                new TestCase("test1", 1, 2, 3, -1),
+                new TestCase("test2", 2, 2, 4, 0),
+                new TestCase("test3", 4, 2, 6, 2)
+        );
+
+        return DynamicTest.stream(testCases.flatMap(this::expandTestCases), this::generateDisplayName, TestCaseMethod::invoke);
+    }
+
+    String generateDisplayName(TestCaseMethod tcm) {
+        Method m = tcm.method();
+        DisplayName displayName = m.getAnnotation(DisplayName.class);
+        String testName = m.getName();
+        if (displayName != null) {
+            testName = renderNameFromRecordComponents(displayName.value(), tcm.testCase, tcm.testCase.getClass().getRecordComponents());
+        }
+        return testName;
+    }
+
+    Stream<TestCaseMethod> expandTestCases(Object testCaseRecord) {
+        List<TestCaseMethod> tcms = new ArrayList<>();
+        for (Method m : testCaseRecord.getClass().getDeclaredMethods()) {
+            if (m.isAnnotationPresent(Test.class)) {
+                tcms.add(new TestCaseMethod(testCaseRecord, m));
+            }
+        }
+        return tcms.stream();
+    }
+
+    record TestCaseMethod(Object testCase, Method method) {
+
+        void invoke() throws InvocationTargetException, IllegalAccessException {
+            method.invoke(testCase);
+        }
+    }
 }
