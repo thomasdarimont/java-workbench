@@ -19,6 +19,7 @@
         <!-- Library experiments -->
         <module>lib-graalvm-js</module>
         <module>lib-jabel</module>
+        <module>lib-junit5-lab</module>
     </modules>
 
     <properties>
@@ -82,7 +83,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>${java.version}</release>
-<!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
 
