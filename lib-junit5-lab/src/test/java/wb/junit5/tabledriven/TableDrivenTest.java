@@ -33,8 +33,7 @@ class TableDrivenTest {
                 new TestCase("test3", 4, 2, 6),
         };
 
-        return Stream.of(testCases)
-                .map(tc -> DynamicTest.dynamicTest(tc.name(), tc::check));
+        return DynamicTest.stream(Stream.of(testCases), TestCase::name, TestCase::check);
     }
 
     @TestFactory
