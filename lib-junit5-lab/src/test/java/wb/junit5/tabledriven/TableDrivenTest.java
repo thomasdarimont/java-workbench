@@ -49,9 +49,9 @@ class TableDrivenTest {
                 new TestCase("test1", 1, 2, 3),
                 new TestCase("test2", 2, 2, 4),
                 new TestCase("test3", 4, 2, 6)
-        ).stream();
+        );
 
-        return DynamicTest.stream(testCases, TestCase::name, TestCase::check);
+        return DynamicTest.stream(testCases.stream(), TestCase::name, TestCase::check);
     }
 
 
