@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TableDrivenTest {
@@ -34,6 +35,25 @@ class TableDrivenTest {
 
         return Stream.of(testCases)
                 .map(tc -> DynamicTest.dynamicTest(tc.name(), tc::check));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> tableDrivenTest2() {
+
+        record T(String input, String separator, String[] expected) {
+
+            public void check() {
+                assertArrayEquals(expected, input.split(separator));
+            }
+        }
+
+        var testCases = new T[]{
+                new T("a/b/c", "/", new String[]{"a", "b", "c"}),
+                new T("a/b/c", ",", new String[]{"a/b/c"}),
+                new T("abc", "/", new String[]{"abc"}),
+        };
+
+        return DynamicTest.stream(Stream.of(testCases), tc -> "input: " + tc.input() + " sep: " + tc.separator(), T::check);
     }
 
     @TestFactory
