@@ -43,13 +43,13 @@ class TableDrivenTest {
 
             @Test
             @DisplayName("${name}: ${a} + ${b} = ${sum}")
-            public void plus() {
+            void plus() {
                 assertEquals(sum, a + b, name);
             }
 
             @Test
             @DisplayName("${name}: ${a} - ${b} = ${diff}")
-            public void minus() {
+            void minus() {
                 assertEquals(diff, a - b, name);
             }
         }
@@ -65,22 +65,24 @@ class TableDrivenTest {
 
     Stream<DynamicTest> reflectiveDynamicTest(Object record) {
         if (!record.getClass().isRecord()) {
-            return null;
+            return Stream.of();
         }
 
         RecordComponent[] recordComponents = record.getClass().getRecordComponents();
 
         List<DynamicTest> dynamicTests = new ArrayList<>();
         for (Method m : record.getClass().getDeclaredMethods()) {
-            if (m.isAnnotationPresent(Test.class)) {
-                DisplayName displayName = m.getAnnotation(DisplayName.class);
-                String testName = m.getName();
-                if (displayName != null) {
-                    testName = renderName(displayName.value(), record, recordComponents);
-                }
-
-                dynamicTests.add(DynamicTest.dynamicTest(testName, () -> m.invoke(record)));
+            if (!m.isAnnotationPresent(Test.class)) {
+                continue;
             }
+
+            DisplayName displayName = m.getAnnotation(DisplayName.class);
+            String testName = m.getName();
+            if (displayName != null) {
+                testName = renderName(displayName.value(), record, recordComponents);
+            }
+
+            dynamicTests.add(DynamicTest.dynamicTest(testName, () -> m.invoke(record)));
         }
 
 
@@ -100,4 +102,32 @@ class TableDrivenTest {
         }
         return name;
     }
+
+
+//    @TestFactory
+//    Stream<DynamicTest> tableDrivenTestFromAnnotationsStreamlined() {
+//
+//        record TestCase(String name, int a, int b, int sum, int diff) {
+//
+//            @Test
+//            @DisplayName("${name}: ${a} + ${b} = ${sum}")
+//            public void plus() {
+//                assertEquals(sum, a + b, name);
+//            }
+//
+//            @Test
+//            @DisplayName("${name}: ${a} - ${b} = ${diff}")
+//            public void minus() {
+//                assertEquals(diff, a - b, name);
+//            }
+//        }
+//
+//        var testCases = List.of(
+//                new TestCase("test1", 1, 2, 3, -1),
+//                new TestCase("test2", 2, 2, 4, 11),
+//                new TestCase("test3", 4, 2, 6, 13)
+//        );
+//
+//        return DynamicTest.stream(testCases.stream(),/* dynamic name generation */, /* test execution */ );
+//    }
 }
