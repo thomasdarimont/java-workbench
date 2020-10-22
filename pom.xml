@@ -20,6 +20,8 @@
         <module>lib-graalvm-js</module>
         <module>lib-jabel</module>
         <module>lib-junit5-lab</module>
+        <module>lib-tink</module>
+        <module>java16-panama</module>
     </modules>
 
     <properties>

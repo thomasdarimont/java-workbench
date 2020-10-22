@@ -65,4 +65,16 @@
             <jdkHome>/Program Files/OpenJDK/graalvm-ce-java11-20.2.0</jdkHome>
         </configuration>
     </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>16-panama</version>
+            <vendor>OpenJDK</vendor>
+            <os>Windows 10</os>
+        </provides>
+        <configuration>
+            <jdkHome>/Program Files/OpenJDK/jdk-16-panama</jdkHome>
+        </configuration>
+    </toolchain>
 </toolchains>

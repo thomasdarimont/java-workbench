@@ -49,4 +49,16 @@
             <jdkHome>/usr/lib/jvm/jdk-16-loom</jdkHome>
         </configuration>
     </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>16-panama</version>
+            <vendor>OpenJDK</vendor>
+            <os>Windows 10</os>
+        </provides>
+        <configuration>
+            <jdkHome>/usr/lib/jvm/jdk-16-panama</jdkHome>
+        </configuration>
+    </toolchain>
 </toolchains>
