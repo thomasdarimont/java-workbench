@@ -2,19 +2,11 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/java11/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/java11/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java15/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/java15/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java16-loom/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/java16-loom/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/java8/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/java8/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib-graalvm-js/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib-graalvm-js/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib-jabel/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib-junit5-lab/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib-junit5-lab/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lib-jabel/src/main/resources" charset="UTF-8" />
   </component>
 </project>

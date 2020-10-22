@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="CompilerConfiguration">
-    <annotationProcessing>
-      <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="lib-jabel" />
-        <module name="java16-loom" />
-        <module name="lib-graalvm-js" />
-        <module name="java8" />
-        <module name="java15" />
-        <module name="lib-junit5-lab" />
-        <module name="java11" />
-      </profile>
-    </annotationProcessing>
-  </component>
-  <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="java11" options="" />
-      <module name="lib-jabel" options="--enable-preview" />
-    </option>
-  </component>
+    <component name="CompilerConfiguration">
+        <annotationProcessing>
+            <profile name="Maven default annotation processors profile" enabled="true">
+                <sourceOutputDir name="target/generated-sources/annotations"/>
+                <sourceTestOutputDir name="target/generated-test-sources/test-annotations"/>
+                <outputRelativeToContentRoot value="true"/>
+                <module name="lib-jabel"/>
+                <module name="java16-loom"/>
+                <module name="lib-graalvm-js"/>
+                <module name="java8"/>
+                <module name="java15"/>
+                <module name="lib-junit5-lab"/>
+                <module name="java11"/>
+            </profile>
+        </annotationProcessing>
+        <bytecodeTargetLevel>
+            <module name="java-workbench" target="15"/>
+            <module name="java11" target="11"/>
+            <module name="java15" target="15"/>
+            <module name="java16-loom" target="16"/>
+            <module name="java8" target="1.8"/>
+            <module name="lib-graalvm-js" target="15"/>
+            <module name="lib-jabel" target="15"/>
+        </bytecodeTargetLevel>
+    </component>
+    <component name="JavacSettings">
+        <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+            <module name="java11" options=""/>
+            <module name="lib-jabel" options="--enable-preview"/>
+        </option>
+    </component>
 </project>
