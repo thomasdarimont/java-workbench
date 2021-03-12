@@ -1,4 +1,4 @@
-package wb.java16loom;
+package wb.javaloom;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;

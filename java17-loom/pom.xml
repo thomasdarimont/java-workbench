@@ -9,11 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>java16-panama</artifactId>
-
+    <artifactId>java17-loom</artifactId>
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
     </properties>
 
     <build>
@@ -24,7 +23,7 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <version>16-panama</version>
+                            <version>17-loom</version>
                             <vendor>OpenJDK</vendor>
                             <os>${os.name}</os>
                         </jdk>
@@ -35,12 +34,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>15</source>
-                    <target>15</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>

@@ -14,19 +14,22 @@
         <module>java8</module>
         <module>java11</module>
         <module>java15</module>
-        <module>java16-loom</module>
+        <module>java16-panama</module>
+        <module>java17-loom</module>
 
         <!-- Library experiments -->
         <module>lib-graalvm-js</module>
         <module>lib-jabel</module>
         <module>lib-junit5-lab</module>
         <module>lib-tink</module>
-        <module>java16-panama</module>
+        <module>java17</module>
     </modules>
 
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- default to java 15 -->
+        <java.version>15</java.version>
 
         <junit.version>5.7.0</junit.version>
         <assertj.version>3.17.2</assertj.version>

@@ -1,6 +1,6 @@
-package wb.java16loom;
+package wb.javaloom;
 
-class MainJava16Loom {
+class MainJavaLoom {
 
     public static void main(String[] args) {
         System.out.printf("Hello from Java %s%n", System.getProperty("java.version"));

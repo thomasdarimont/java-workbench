@@ -10,7 +10,7 @@
             <os>linux</os>
         </provides>
         <configuration>
-            <jdkHome>/home/tom/.sdkman/candidates/java/8.0.265.hs-adpt</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/8.0.275.hs-adpt</jdkHome>
         </configuration>
     </toolchain>
 
@@ -22,7 +22,7 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>/home/tom/.sdkman/candidates/java/11.0.8.hs-adpt</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/11.0.9.hs-adpt</jdkHome>
         </configuration>
     </toolchain>
 
@@ -34,19 +34,7 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>/home/tom/.sdkman/candidates/java/15.0.0.hs-adpt</jdkHome>
-        </configuration>
-    </toolchain>
-
-    <toolchain>
-        <type>jdk</type>
-        <provides>
-            <version>16-loom</version>
-            <vendor>OpenJDK</vendor>
-            <os>Linux</os>
-        </provides>
-        <configuration>
-            <jdkHome>/usr/lib/jvm/jdk-16-loom</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/15.0.1.hs-adpt</jdkHome>
         </configuration>
     </toolchain>
 
@@ -55,10 +43,34 @@
         <provides>
             <version>16-panama</version>
             <vendor>OpenJDK</vendor>
-            <os>Windows 10</os>
+            <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>/usr/lib/jvm/jdk-16-panama</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/16.ea.3.pma-open</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>17-loom</version>
+            <vendor>OpenJDK</vendor>
+            <os>Linux</os>
+        </provides>
+        <configuration>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.2.lm-open</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>17-open</version>
+            <vendor>OpenJDK</vendor>
+            <os>Linux</os>
+        </provides>
+        <configuration>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.11-open</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
