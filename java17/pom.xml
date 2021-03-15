@@ -11,7 +11,6 @@
 
     <artifactId>java17</artifactId>
 
-
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -35,8 +34,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <release>${java.version}</release>
+                    <release>${java.version}</release>
+                    <release>${java.version}</release>
+                    <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
         </plugins>

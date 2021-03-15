@@ -13,7 +13,7 @@
 
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
     </properties>
 
     <build>
@@ -24,7 +24,7 @@
                 <configuration>
                     <toolchains>
                         <jdk>
-                            <version>16-panama</version>
+                            <version>17-panama</version>
                             <vendor>OpenJDK</vendor>
                             <os>${os.name}</os>
                         </jdk>

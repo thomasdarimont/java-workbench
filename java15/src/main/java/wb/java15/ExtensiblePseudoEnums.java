@@ -16,7 +16,8 @@ class ExtensiblePseudoEnums {
         if (typeHint == TypeHint.DEFAULT) {
             System.out.println("handle default");
         } else if (typeHint == TypeHint.PII) {
-            System.out.println("handle PII");
+            System.out.println("handle" +
+                    " PII");
         } else if (typeHint == CUSTOM) {
             System.out.println("handle CUSTOM");
         }
