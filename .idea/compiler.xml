@@ -7,16 +7,17 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="lib-jabel" />
-        <module name="lib-graalvm-js" />
         <module name="lib-tink" />
-        <module name="java8" />
-        <module name="java-loom" />
         <module name="java17" />
         <module name="java-panama" />
         <module name="java15" />
-        <module name="lib-junit5-lab" />
         <module name="lib-testcontainers" />
         <module name="java11" />
+        <module name="lib-graalvm-js" />
+        <module name="java8" />
+        <module name="java-loom" />
+        <module name="lib-bytebuddy" />
+        <module name="lib-junit5-lab" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -27,6 +28,7 @@
       <module name="java15" target="15" />
       <module name="java17" target="17" />
       <module name="java8" target="1.8" />
+      <module name="lib-bytebuddy" target="15" />
       <module name="lib-graalvm-js" target="14" />
       <module name="lib-jabel" target="8" />
       <module name="lib-junit5-lab" target="15" />
