@@ -34,7 +34,7 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>${env.HOME}/.sdkman/candidates/java/15.0.1.hs-adpt</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/15.0.2.hs-adpt</jdkHome>
         </configuration>
     </toolchain>
 
@@ -58,7 +58,7 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.2.lm-open</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.6.lm-open</jdkHome>
         </configuration>
     </toolchain>
 
@@ -70,7 +70,7 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.13-open</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.16-open</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>

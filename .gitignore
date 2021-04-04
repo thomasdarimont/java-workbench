@@ -3,6 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,intellij+iml,maven,gradle,eclipse,osx,windows,visualstudiocode
 
 tmp/
+data/
 
 ### Eclipse ###
 .metadata

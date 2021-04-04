@@ -17,15 +17,16 @@ class VirtualThreadsDemo {
 
         Runnable task = () -> VirtualThreadsDemo.sleep(cdl);
 
-        var threadBuilder = Thread.builder()
+        var threadBuilder = Thread.ofVirtual()
                 .name("virtual-thread-", 1)
-                .virtual(executorService);
+                .scheduler(executorService)
+                .factory();
 
         boolean useVirtualThreads = true;
 
         for (int i = 0; i < nTasks; i++) {
             if (useVirtualThreads) {
-                threadBuilder.task(task).build().start();
+                threadBuilder.newThread(task).start();
             } else {
                 executorService.execute(task);
             }

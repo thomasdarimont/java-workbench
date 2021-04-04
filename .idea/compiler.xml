@@ -17,12 +17,13 @@
         <module name="java8" />
         <module name="java-loom" />
         <module name="lib-bytebuddy" />
+        <module name="tool-jmc-lab" />
         <module name="lib-junit5-lab" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="java-loom" target="17" />
-      <module name="java-panama" target="15" />
+      <module name="java-loom" target="16" />
+      <module name="java-panama" target="16" />
       <module name="java-workbench" target="15" />
       <module name="java11" target="11" />
       <module name="java15" target="15" />
@@ -34,12 +35,13 @@
       <module name="lib-junit5-lab" target="15" />
       <module name="lib-testcontainers" target="15" />
       <module name="lib-tink" target="15" />
+      <module name="tool-jmc-lab" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="java11" options="" />
-      <module name="java17" options="--add-exports java.base/sun.reflect.annotation=ALL-UNNAMED" />
+      <module name="java17" options="--enable-preview --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED --add-exports java.base/sun.reflect.annotation=ALL-UNNAMED" />
       <module name="lib-jabel" options="--enable-preview" />
     </option>
   </component>
