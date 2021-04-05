@@ -17,6 +17,21 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <configuration combine.self="override">
+                    <toolchains>
+                        <jdk>
+                            <version>${java.version}</version>
+                            <vendor>OpenJDK</vendor>
+                            <os>${os.name}</os>
+                        </jdk>
+                    </toolchains>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
