@@ -21,14 +21,16 @@ public class DetectDanglingThreadsExtension implements BeforeEachCallback, After
 
         Set<Thread> danglingThreads = Thread.getAllStackTraces().keySet();
         danglingThreads.removeAll(threadsBeforeTest);
-        danglingThreads.removeIf(t ->  {
-            return Thread.State.TERMINATED.equals(t.getState());
-        });
+        danglingThreads.removeIf(t -> Thread.State.TERMINATED.equals(t.getState()) || "system".equals(t.getThreadGroup().getName()));
 
-        if (danglingThreads.size() > 0) {
-            String message = String.format("%s.%s created %s dangling threads: %s",
-                    context.getTestClass().orElseThrow().getName(), context.getTestMethod().orElseThrow().getName(), danglingThreads.size(), danglingThreads);
-            Assertions.fail(message);
+        if (danglingThreads.isEmpty()) {
+            return;
         }
+
+        String testClassName = context.getTestClass().orElseThrow().getName();
+        String methodName = context.getTestMethod().orElseThrow().getName();
+        int count = danglingThreads.size();
+        String message = String.format("%s.%s created %s dangling threads: %s", testClassName, methodName, count, danglingThreads);
+        Assertions.fail(message);
     }
 }

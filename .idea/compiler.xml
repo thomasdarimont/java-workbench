@@ -32,10 +32,10 @@
       <module name="lib-bytebuddy" target="15" />
       <module name="lib-graalvm-js" target="14" />
       <module name="lib-jabel" target="8" />
-      <module name="lib-junit5-lab" target="15" />
+      <module name="lib-junit5-lab" target="17" />
       <module name="lib-testcontainers" target="15" />
       <module name="lib-tink" target="15" />
-      <module name="tool-jmc-lab" target="17" />
+      <module name="tool-jmc-lab" target="16" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -43,6 +43,7 @@
       <module name="java11" options="" />
       <module name="java17" options="--enable-preview --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED --add-exports java.base/sun.reflect.annotation=ALL-UNNAMED" />
       <module name="lib-jabel" options="--enable-preview" />
+      <module name="lib-junit5-lab" options="--enable-preview" />
     </option>
   </component>
 </project>
