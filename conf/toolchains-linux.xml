@@ -70,7 +70,7 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.16-open</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.17-open</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
