@@ -16,12 +16,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Compile:
@@ -38,6 +40,7 @@ import java.util.function.BiConsumer;
  * <p>
  * Run GraalVM Native Image
  * <pre>./MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
+ * <pre>./MainMethodFinder ~/.sdkman/candidates/java/11.0.10.hs-adpt</pre>
  */
 public class MainMethodFinder {
 
@@ -53,13 +56,14 @@ public class MainMethodFinder {
 
             System.out.printf("Scanning Java Installation: %s%n", jdkHomePath);
 
-            BiConsumer<File, String> mainMethodReporter = (libraryFile, mainClassName) -> {
-                System.out.printf("Found main in %s: %s %n", libraryFile.getName(), mainClassName);
-            };
+            var mainMethods = new CopyOnWriteArrayList<MainMethod>();
 
-            MainMethodReportingVisitor visitor = new MainMethodReportingVisitor(mainMethodReporter);
+            MainMethodReportingVisitor visitor = new MainMethodReportingVisitor(mainMethods::add);
             Files.walkFileTree(jdkHomePath, visitor);
             visitor.join();
+
+            mainMethods.sort(Comparator.comparing((MainMethod left) -> left.library.getName()).thenComparing((MainMethod left) -> left.className));
+            mainMethods.forEach(m -> System.out.printf("Found main in %s: %s %n", m.library.getName(), m.className));
         } finally {
             time = System.nanoTime() - time;
             System.out.printf("time = %dms%n", TimeUnit.NANOSECONDS.toMillis(time));
@@ -73,11 +77,11 @@ public class MainMethodFinder {
 
     static class MainMethodReportingVisitor extends SimpleFileVisitor<Path> {
 
-        private final BiConsumer<File, String> consumer;
+        private final Consumer<MainMethod> consumer;
 
         private final Queue<RecursiveAction> outstanding = new ConcurrentLinkedQueue<>();
 
-        public MainMethodReportingVisitor(BiConsumer<File, String> consumer) {
+        public MainMethodReportingVisitor(Consumer<MainMethod> consumer) {
             this.consumer = consumer;
         }
 
@@ -122,6 +126,18 @@ public class MainMethodFinder {
         }
     }
 
+    static class MainMethod {
+
+        File library;
+
+        String className;
+
+        public MainMethod(File library, String className) {
+            this.library = library;
+            this.className = className;
+        }
+    }
+
     static class MainMethodVisitor extends ClassVisitor {
 
         // Adapted from Opcodes.ASM*
@@ -140,10 +156,10 @@ public class MainMethodFinder {
         private final ThreadLocal<String> currentInternalClassName = new ThreadLocal<>();
 
         private final File library;
-        private final BiConsumer<File, String> mainMethodConsumer;
+        private final Consumer<MainMethod> mainMethodConsumer;
         private final FileSystem fileSystem;
 
-        public MainMethodVisitor(File library, BiConsumer<File, String> mainMethodConsumer, FileSystem fileSystem) {
+        public MainMethodVisitor(File library, Consumer<MainMethod> mainMethodConsumer, FileSystem fileSystem) {
             super(ASM_API_VERSION);
             this.library = library;
             this.mainMethodConsumer = mainMethodConsumer;
@@ -165,7 +181,7 @@ public class MainMethodFinder {
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
             if (isRunnableMainMethod(access, name, descriptor)) {
-                mainMethodConsumer.accept(library, currentInternalClassName.get().replace('/', '.'));
+                mainMethodConsumer.accept(new MainMethod(library, currentInternalClassName.get().replace('/', '.')));
             }
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
