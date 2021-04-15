@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * <pre>javac --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED  -d target/classes src/main/java/wb/java17/MainMethodFinder.java </pre>
@@ -43,7 +44,7 @@ public class MainMethodFinder {
         };
 
         ExecutorService scannerThreads = Executors.newFixedThreadPool(Integer.getInteger("scannerThreads", 16));
-        Files.walkFileTree(jdkHomePath, new MainMethodReportingVisitor(mainMethodReporter, scannerThreads));
+        Files.walkFileTree(jdkHomePath, new MainMethodReportingVisitor(mainMethodReporter, scannerThreads::submit));
 
         scannerThreads.shutdown();
         while(!scannerThreads.awaitTermination(5, TimeUnit.SECONDS)) {
@@ -57,18 +58,18 @@ public class MainMethodFinder {
     static class MainMethodReportingVisitor extends SimpleFileVisitor<Path> {
 
         private final BiConsumer<File, String> consumer;
-        private final ExecutorService executorService;
+        private final Consumer<Runnable> executor;
 
-        public MainMethodReportingVisitor(BiConsumer<File, String> consumer, ExecutorService executorService) {
+        public MainMethodReportingVisitor(BiConsumer<File, String> consumer, Consumer<Runnable> executor) {
             this.consumer = consumer;
-            this.executorService = executorService;
+            this.executor = executor;
         }
 
         @Override
         public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) {
             var maybeJdkLibrary = filePath.toFile();
             if (isJdkLibrary(maybeJdkLibrary.getName())) {
-                executorService.submit(() -> scanLibraryForMainClasses(maybeJdkLibrary));
+                executor.accept(() -> scanLibraryForMainClasses(maybeJdkLibrary));
             }
             return FileVisitResult.CONTINUE;
         }
@@ -81,7 +82,7 @@ public class MainMethodFinder {
             try (var fileSystem = FileSystems.newFileSystem(library.toPath())) {
                 var root = fileSystem.getRootDirectories().iterator().next();
                 var visitor = new MainMethodVisitor(library, consumer, fileSystem);
-                Files.walk(root).filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
+                Files.walk(root).parallel().filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
             } catch (IOException e) {
                 e.printStackTrace();
             }
