@@ -16,7 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -56,13 +58,10 @@ public class MainMethodFinder {
 
             System.out.printf("Scanning Java Installation: %s%n", jdkHomePath);
 
-            var mainMethods = new CopyOnWriteArrayList<MainMethod>();
-
-            MainMethodReportingVisitor visitor = new MainMethodReportingVisitor(mainMethods::add);
+            MainMethodReportingVisitor visitor = new MainMethodReportingVisitor();
             Files.walkFileTree(jdkHomePath, visitor);
-            visitor.join();
 
-            mainMethods.sort(Comparator.comparing((MainMethod left) -> left.library.getName()).thenComparing((MainMethod left) -> left.className));
+            List<MainMethod> mainMethods = visitor.waitForCompletionAndReturnMainMethods();
             mainMethods.forEach(m -> System.out.printf("Found main in %s: %s %n", m.library.getName(), m.className));
         } finally {
             time = System.nanoTime() - time;
@@ -77,13 +76,9 @@ public class MainMethodFinder {
 
     static class MainMethodReportingVisitor extends SimpleFileVisitor<Path> {
 
-        private final Consumer<MainMethod> consumer;
+        private final CopyOnWriteArrayList<MainMethod> mainMethods = new CopyOnWriteArrayList<>();
 
         private final Queue<RecursiveAction> outstanding = new ConcurrentLinkedQueue<>();
-
-        public MainMethodReportingVisitor(Consumer<MainMethod> consumer) {
-            this.consumer = consumer;
-        }
 
         @Override
         public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) {
@@ -100,10 +95,19 @@ public class MainMethodFinder {
             return FileVisitResult.CONTINUE;
         }
 
-        public void join() {
+        public List<MainMethod> waitForCompletionAndReturnMainMethods() {
             for (RecursiveAction action; (action = outstanding.poll()) != null; ) {
                 action.join();
             }
+            List<MainMethod> result = new ArrayList<>(this.mainMethods);
+            this.mainMethods.clear();
+
+            var cmp = Comparator
+                    .comparing((MainMethod left) -> left.library.getName())
+                    .thenComparing((MainMethod left) -> left.className);
+            result.sort(cmp);
+
+            return result;
         }
 
         private boolean isJdkLibrary(String maybeJdkLibraryName) {
@@ -114,7 +118,7 @@ public class MainMethodFinder {
             // Using FileSystems.newFileSystem(library.toPath(), (ClassLoader)null) for Java 11 compatibility
             try (var fileSystem = FileSystems.newFileSystem(library.toPath(), (ClassLoader) null)) {
                 var root = fileSystem.getRootDirectories().iterator().next();
-                var visitor = new MainMethodVisitor(library, consumer, fileSystem);
+                var visitor = new MainMethodVisitor(library, mainMethods::add, fileSystem);
                 Files.walk(root).parallel().filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
             } catch (IOException e) {
                 e.printStackTrace();
