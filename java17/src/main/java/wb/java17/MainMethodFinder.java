@@ -32,6 +32,12 @@ import java.util.function.BiConsumer;
  * <p>
  * Run with different Java Home:
  * <pre>java --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED -cp target/classes wb.java17.MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
+ *
+ * Compile with GraalVM Native Image:
+ * <pre>native-image -cp target/classes wb.java17.MainMethodFinder MainMethodFinder</pre>
+ *
+ * Run GraalVM Native Image
+ * <pre>./MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
  */
 public class MainMethodFinder {
 
@@ -101,7 +107,8 @@ public class MainMethodFinder {
         }
 
         private void scanLibraryForMainClasses(File library) {
-            try (var fileSystem = FileSystems.newFileSystem(library.toPath())) {
+            // Using FileSystems.newFileSystem(library.toPath(), (ClassLoader)null) for Java 11 compatibility
+            try (var fileSystem = FileSystems.newFileSystem(library.toPath(), (ClassLoader) null)) {
                 var root = fileSystem.getRootDirectories().iterator().next();
                 var visitor = new MainMethodVisitor(library, consumer, fileSystem);
                 Files.walk(root).parallel().filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
@@ -117,6 +124,19 @@ public class MainMethodFinder {
 
     static class MainMethodVisitor extends ClassVisitor {
 
+        // Adapted from Opcodes.ASM*
+        private static final int ASM6 = 6 << 16;
+        private static final int ASM7 = 7 << 16;
+        private static final int ASM8 = 8 << 16;
+
+        private static final int ASM_API_VERSION =
+                // Opcodes.ASM8 // not using this constant to support running on Java11-17
+                System.getProperty("java.version").startsWith("11.")
+                ? ASM6
+                : System.getProperty("java.version").startsWith("15.")
+                ? ASM7
+                : ASM8;
+
         private String currentInternalClassName;
 
         private final File library;
@@ -124,7 +144,7 @@ public class MainMethodFinder {
         private final FileSystem fileSystem;
 
         public MainMethodVisitor(File library, BiConsumer<File, String> mainMethodConsumer, FileSystem fileSystem) {
-            super(Opcodes.ASM8);
+            super(ASM_API_VERSION);
             this.library = library;
             this.mainMethodConsumer = mainMethodConsumer;
             this.fileSystem = fileSystem;
