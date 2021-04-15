@@ -137,7 +137,7 @@ public class MainMethodFinder {
                 ? ASM7
                 : ASM8;
 
-        private String currentInternalClassName;
+        private ThreadLocal<String> currentInternalClassName = new ThreadLocal<>();
 
         private final File library;
         private final BiConsumer<File, String> mainMethodConsumer;
@@ -152,14 +152,14 @@ public class MainMethodFinder {
 
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-            currentInternalClassName = name;
+            currentInternalClassName.set(name);
             super.visit(version, access, name, signature, superName, interfaces);
         }
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
             if (name.equals("main")) {
-                mainMethodConsumer.accept(library, currentInternalClassName.replace('/', '.'));
+                mainMethodConsumer.accept(library, currentInternalClassName.get().replace('/', '.'));
             }
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
