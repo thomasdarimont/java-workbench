@@ -3,7 +3,6 @@ package wb.java17;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.ClassVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.internal.org.objectweb.asm.Opcodes;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -32,10 +31,10 @@ import java.util.function.BiConsumer;
  * <p>
  * Run with different Java Home:
  * <pre>java --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED -cp target/classes wb.java17.MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
- *
+ * <p>
  * Compile with GraalVM Native Image:
  * <pre>native-image -cp target/classes wb.java17.MainMethodFinder MainMethodFinder</pre>
- *
+ * <p>
  * Run GraalVM Native Image
  * <pre>./MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
  */
@@ -83,16 +82,17 @@ public class MainMethodFinder {
 
         @Override
         public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) {
-            var action = new RecursiveAction() {
-                protected void compute() {
-                    var maybeJdkLibrary = filePath.toFile();
-                    if (isJdkLibrary(maybeJdkLibrary.getName())) {
+
+            var maybeJdkLibrary = filePath.toFile();
+            if (isJdkLibrary(maybeJdkLibrary.getName())) {
+                var action = new RecursiveAction() {
+                    protected void compute() {
                         scanLibraryForMainClasses(maybeJdkLibrary);
                     }
-                }
-            };
-            action.fork();
-            outstanding.add(action);
+                };
+                action.fork();
+                outstanding.add(action);
+            }
             return FileVisitResult.CONTINUE;
         }
 
@@ -132,10 +132,10 @@ public class MainMethodFinder {
         private static final int ASM_API_VERSION =
                 // Opcodes.ASM8 // not using this constant to support running on Java11-17
                 System.getProperty("java.version").startsWith("11.")
-                ? ASM6
-                : System.getProperty("java.version").startsWith("15.")
-                ? ASM7
-                : ASM8;
+                        ? ASM6
+                        : System.getProperty("java.version").startsWith("15.")
+                        ? ASM7
+                        : ASM8;
 
         private ThreadLocal<String> currentInternalClassName = new ThreadLocal<>();
 
