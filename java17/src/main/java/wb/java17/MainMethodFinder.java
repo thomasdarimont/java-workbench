@@ -33,7 +33,7 @@ public class MainMethodFinder {
         var jdkHomePath = Paths.get(javaCommandPath).resolve("../..").normalize();
 
         BiConsumer<File, String> mainMethodReporter = (libraryFile, mainClassName) -> {
-            System.out.printf("Found %s in %s%n", mainClassName, libraryFile.getName());
+            System.out.printf("Found main in %s: %s %n", libraryFile.getName(), mainClassName);
         };
 
         Files.walkFileTree(jdkHomePath, new MainMethodReportingVisitor(mainMethodReporter));
@@ -64,7 +64,7 @@ public class MainMethodFinder {
             try (var fileSystem = FileSystems.newFileSystem(library.toPath())) {
                 var root = fileSystem.getRootDirectories().iterator().next();
                 var visitor = new MainMethodVisitor(library, consumer, fileSystem);
-                Files.walk(root).filter(this::isClassFile).forEachOrdered(visitor::scanClassForMainMethod);
+                Files.walk(root).filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
             } catch (IOException e) {
                 e.printStackTrace();
             }
