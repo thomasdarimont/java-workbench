@@ -96,9 +96,11 @@ public class MainMethodFinder {
         }
 
         public List<MainMethod> waitForCompletionAndReturnMainMethods() {
+
             for (RecursiveAction action; (action = outstanding.poll()) != null; ) {
                 action.join();
             }
+
             List<MainMethod> result = new ArrayList<>(this.mainMethods);
             this.mainMethods.clear();
 
@@ -157,17 +159,17 @@ public class MainMethodFinder {
                         ? ASM7
                         : ASM8;
 
-        private final ThreadLocal<String> currentInternalClassName = new ThreadLocal<>();
-
         private final File library;
-        private final Consumer<MainMethod> mainMethodConsumer;
         private final FileSystem fileSystem;
+        private final Consumer<MainMethod> mainMethodConsumer;
+        private final ThreadLocal<String> currentInternalClassName;
 
         public MainMethodVisitor(File library, Consumer<MainMethod> mainMethodConsumer, FileSystem fileSystem) {
             super(ASM_API_VERSION);
             this.library = library;
-            this.mainMethodConsumer = mainMethodConsumer;
             this.fileSystem = fileSystem;
+            this.mainMethodConsumer = mainMethodConsumer;
+            this.currentInternalClassName = new ThreadLocal<>();
         }
 
         @Override
