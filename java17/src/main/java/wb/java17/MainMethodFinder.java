@@ -3,6 +3,7 @@ package wb.java17;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.ClassVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
+import jdk.internal.org.objectweb.asm.Opcodes;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -82,7 +83,6 @@ public class MainMethodFinder {
 
         @Override
         public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) {
-
             var maybeJdkLibrary = filePath.toFile();
             if (isJdkLibrary(maybeJdkLibrary.getName())) {
                 var action = new RecursiveAction() {
@@ -137,7 +137,7 @@ public class MainMethodFinder {
                         ? ASM7
                         : ASM8;
 
-        private ThreadLocal<String> currentInternalClassName = new ThreadLocal<>();
+        private final ThreadLocal<String> currentInternalClassName = new ThreadLocal<>();
 
         private final File library;
         private final BiConsumer<File, String> mainMethodConsumer;
@@ -157,11 +157,23 @@ public class MainMethodFinder {
         }
 
         @Override
+        public void visitEnd() {
+            super.visitEnd();
+            currentInternalClassName.remove();
+        }
+
+        @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-            if (name.equals("main")) {
+            if (isRunnableMainMethod(access, name, descriptor)) {
                 mainMethodConsumer.accept(library, currentInternalClassName.get().replace('/', '.'));
             }
             return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
+        private boolean isRunnableMainMethod(int access, String name, String descriptor) {
+            return "main".equals(name)
+                    && (access & Opcodes.ACC_STATIC) != 0
+                    && "([Ljava/lang/String;)V".equals(descriptor);
         }
 
         private void scanClassForMainMethod(Path pathToLibraryClass) {
