@@ -16,7 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
@@ -25,9 +30,10 @@ import java.util.function.BiConsumer;
  */
 public class MainMethodFinder {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         System.out.printf("Java Version: %s%n", Runtime.version());
+        Instant start = Instant.now();
 
         var javaCommandPath = ProcessHandle.current().info().command().orElseThrow();
         var jdkHomePath = Paths.get(javaCommandPath).resolve("../..").normalize();
@@ -36,22 +42,33 @@ public class MainMethodFinder {
             System.out.printf("Found main in %s: %s %n", libraryFile.getName(), mainClassName);
         };
 
-        Files.walkFileTree(jdkHomePath, new MainMethodReportingVisitor(mainMethodReporter));
+        ExecutorService scannerThreads = Executors.newFixedThreadPool(Integer.getInteger("scannerThreads", 16));
+        Files.walkFileTree(jdkHomePath, new MainMethodReportingVisitor(mainMethodReporter, scannerThreads));
+
+        scannerThreads.shutdown();
+        while(!scannerThreads.awaitTermination(5, TimeUnit.SECONDS)) {
+            System.out.println("Waiting for scanning to complete");
+        }
+
+        Duration duration = Duration.between(start, Instant.now());
+        System.out.printf("Took: %s%n", duration);
     }
 
     static class MainMethodReportingVisitor extends SimpleFileVisitor<Path> {
 
         private final BiConsumer<File, String> consumer;
+        private final ExecutorService executorService;
 
-        public MainMethodReportingVisitor(BiConsumer<File, String> consumer) {
+        public MainMethodReportingVisitor(BiConsumer<File, String> consumer, ExecutorService executorService) {
             this.consumer = consumer;
+            this.executorService = executorService;
         }
 
         @Override
         public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) {
             var maybeJdkLibrary = filePath.toFile();
             if (isJdkLibrary(maybeJdkLibrary.getName())) {
-                scanLibraryForMainClasses(maybeJdkLibrary);
+                executorService.submit(() -> scanLibraryForMainClasses(maybeJdkLibrary));
             }
             return FileVisitResult.CONTINUE;
         }
