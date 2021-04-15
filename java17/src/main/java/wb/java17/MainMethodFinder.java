@@ -16,62 +16,84 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * <pre>javac --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED  -d target/classes src/main/java/wb/java17/MainMethodFinder.java </pre>
  * <pre>java --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED -cp target/classes wb.java17.MainMethodFinder</pre>
  */
 public class MainMethodFinder {
+    public static void main(String[] args) throws IOException {
 
-    public static void main(String[] args) throws Exception {
+        System.out.println(ForkJoinPool.commonPool());
 
-        System.out.printf("Java Version: %s%n", Runtime.version());
-        Instant start = Instant.now();
+//        warmup(10);
+        test();
 
-        var javaCommandPath = ProcessHandle.current().info().command().orElseThrow();
-        var jdkHomePath = Paths.get(javaCommandPath).resolve("../..").normalize();
+        System.out.println(ForkJoinPool.commonPool());
+    }
 
-        BiConsumer<File, String> mainMethodReporter = (libraryFile, mainClassName) -> {
-            System.out.printf("Found main in %s: %s %n", libraryFile.getName(), mainClassName);
-        };
-
-        ExecutorService scannerThreads = Executors.newFixedThreadPool(Integer.getInteger("scannerThreads", 16));
-        Files.walkFileTree(jdkHomePath, new MainMethodReportingVisitor(mainMethodReporter, scannerThreads::submit));
-
-        scannerThreads.shutdown();
-        while(!scannerThreads.awaitTermination(5, TimeUnit.SECONDS)) {
-            System.out.println("Waiting for scanning to complete");
+    private static void warmup(int n) throws IOException {
+        for (int i = 0; i < n; i++) {
+            test();
         }
+    }
 
-        Duration duration = Duration.between(start, Instant.now());
-        System.out.printf("Took: %s%n", duration);
+    private static void test() throws IOException {
+        long time = System.nanoTime();
+        try {
+            System.out.printf("Java Version: %s%n", Runtime.version());
+
+            var javaCommandPath = ProcessHandle.current().info().command().orElseThrow();
+            var jdkHomePath = Paths.get(javaCommandPath).resolve("../..").normalize();
+
+            BiConsumer<File, String> mainMethodReporter = (libraryFile, mainClassName) -> {
+                System.out.printf("Found main in %s: %s %n", libraryFile.getName(), mainClassName);
+            };
+
+            MainMethodReportingVisitor visitor = new MainMethodReportingVisitor(mainMethodReporter);
+            Files.walkFileTree(jdkHomePath, visitor);
+            visitor.join();
+        } finally {
+            time = System.nanoTime() - time;
+            System.out.printf("time = %dms%n", (time / 1_000_000));
+        }
     }
 
     static class MainMethodReportingVisitor extends SimpleFileVisitor<Path> {
 
         private final BiConsumer<File, String> consumer;
-        private final Consumer<Runnable> executor;
 
-        public MainMethodReportingVisitor(BiConsumer<File, String> consumer, Consumer<Runnable> executor) {
+        private final Queue<RecursiveAction> outstanding = new ConcurrentLinkedQueue<>();
+
+        public MainMethodReportingVisitor(BiConsumer<File, String> consumer) {
             this.consumer = consumer;
-            this.executor = executor;
         }
 
         @Override
         public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) {
-            var maybeJdkLibrary = filePath.toFile();
-            if (isJdkLibrary(maybeJdkLibrary.getName())) {
-                executor.accept(() -> scanLibraryForMainClasses(maybeJdkLibrary));
-            }
+            RecursiveAction action = new RecursiveAction() {
+                protected void compute() {
+                    var maybeJdkLibrary = filePath.toFile();
+                    if (isJdkLibrary(maybeJdkLibrary.getName())) {
+                        scanLibraryForMainClasses(maybeJdkLibrary);
+                    }
+                }
+            };
+            action.fork();
+            outstanding.add(action);
             return FileVisitResult.CONTINUE;
+        }
+
+        public void join() {
+            for (RecursiveAction action; (action = outstanding.poll()) != null; ) {
+                action.join();
+            }
         }
 
         private boolean isJdkLibrary(String maybeJdkLibraryName) {
@@ -82,7 +104,8 @@ public class MainMethodFinder {
             try (var fileSystem = FileSystems.newFileSystem(library.toPath())) {
                 var root = fileSystem.getRootDirectories().iterator().next();
                 var visitor = new MainMethodVisitor(library, consumer, fileSystem);
-                Files.walk(root).parallel().filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
+                Files.walk(root).parallel().filter(this::isClassFile)
+                        .forEach(visitor::scanClassForMainMethod);
             } catch (IOException e) {
                 e.printStackTrace();
             }
