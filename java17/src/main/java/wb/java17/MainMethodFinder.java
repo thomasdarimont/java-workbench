@@ -29,45 +29,97 @@ import java.util.function.Consumer;
 
 /**
  * Compile:
- * <pre>javac --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED  -d target/classes src/main/java/wb/java17/MainMethodFinder.java </pre>
+ * <pre>javac --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED  -d target/classes src/main/java/wb/java17/MainMethodFinder.java</pre>
  * <p>
  * Run:
- * <pre>java --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED -cp target/classes wb.java17.MainMethodFinder</pre>
+ * <pre>java -DshowCommand=true --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED -cp target/classes wb.java17.MainMethodFinder</pre>
  * <p>
  * Run with different Java Home:
- * <pre>java --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED -cp target/classes wb.java17.MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
+ * <pre>java -DshowCommand=true --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED -cp target/classes wb.java17.MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
  * <p>
  * Compile with GraalVM Native Image:
  * <pre>native-image -cp target/classes wb.java17.MainMethodFinder MainMethodFinder</pre>
  * <p>
  * Run GraalVM Native Image
- * <pre>./MainMethodFinder ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
- * <pre>./MainMethodFinder ~/.sdkman/candidates/java/11.0.10.hs-adpt</pre>
+ * <pre>./MainMethodFinder -DshowCommand=true ~/.sdkman/candidates/java/8.0.282.hs-adpt</pre>
+ * <pre>./MainMethodFinder -DshowCommand=true ~/.sdkman/candidates/java/11.0.10.hs-adpt</pre>
  */
 public class MainMethodFinder {
+
+    private static final boolean VERBOSE = Boolean.getBoolean("verbose");
+
+    private static final boolean IS_NATIVE_IMAGE = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
+
+    private static final boolean SHOW_COMMAND = Boolean.getBoolean("showCommand");
 
     public static void main(String[] args) throws IOException {
 
         long time = System.nanoTime();
         try {
-//            System.out.printf("Java Version: %s%n", Runtime.version());
 
-            var jdkHomePath = args.length > 0
+            boolean customJdkPathProvided = args.length > 0;
+            if (!customJdkPathProvided && IS_NATIVE_IMAGE) {
+                System.err.println("MainMethodFinder: Missing path operand.");
+                System.err.println("Usage: MainMethodFinder /path/to/jdk");
+                System.exit(-1);
+                return;
+            }
+
+            var jdkHomePath = customJdkPathProvided
                     ? Path.of(args[0])
                     : detectCurrentJdkPath();
 
-            System.out.printf("Scanning Java Installation: %s%n", jdkHomePath);
+            if (VERBOSE) {
+                System.out.printf("Scanning Java Installation: %s%n", jdkHomePath);
+            }
 
             MainMethodReportingVisitor visitor = new MainMethodReportingVisitor();
             Files.walkFileTree(jdkHomePath, visitor);
 
             List<MainMethod> mainMethods = visitor.waitForCompletionAndReturnMainMethods();
-            mainMethods.forEach(m -> System.out.printf("Found main in %s: %s %n", m.library.getName(), m.className));
+            mainMethods.forEach(mainMethod -> {
+
+                String libraryFileName = mainMethod.library.getName();
+                if (libraryFileName.endsWith(".jar") && !libraryFileName.equals("rt.jar")) {
+                    libraryFileName = "lib/" + libraryFileName;
+                }
+                String mainClassName = mainMethod.className;
+                String libraryName = libraryFileName.replaceAll("\\.jmod", "");
+
+                if (SHOW_COMMAND) {
+
+                    String launchCommand = generateLaunchCommand(!customJdkPathProvided, jdkHomePath, libraryFileName, mainClassName, libraryName);
+
+                    System.out.printf("%s%n", launchCommand);
+                } else {
+                    System.out.printf("%s %s%n", libraryName, mainClassName);
+                }
+            });
         } finally {
             time = System.nanoTime() - time;
-            System.out.printf("time = %dms%n", TimeUnit.NANOSECONDS.toMillis(time));
-//            System.out.printf("ForkJoin Pool Stats: %s%n", ForkJoinPool.commonPool());
+            if (VERBOSE) {
+                System.out.printf("time = %dms%n", TimeUnit.NANOSECONDS.toMillis(time));
+                // System.out.printf("ForkJoin Pool Stats: %s%n", ForkJoinPool.commonPool());
+            }
         }
+    }
+
+    private static String generateLaunchCommand(boolean useCurrentJdk, Path jdkHomePath, String libraryFileName, String mainClassName, String libraryName) {
+
+        String launchCommand =  (useCurrentJdk ? "" : jdkHomePath.toFile().getAbsolutePath() + "/bin/") + "java";
+
+        if (libraryFileName.endsWith(".jmod")) {
+            launchCommand += (useCurrentJdk ? "" : " --module-path " + jdkHomePath.toFile().getAbsolutePath() + "/jmods");
+            launchCommand += " -m " + libraryName + "/" + mainClassName;
+
+        } else if (libraryFileName.endsWith(".jar")) {
+            launchCommand += " -cp " + jdkHomePath.toFile().getAbsolutePath() + "/" + libraryFileName;
+            launchCommand += " " + mainClassName;
+        } else {
+            launchCommand = String.format("Could not generate launch command for: %s %s", libraryFileName, mainClassName);
+        }
+
+        return launchCommand;
     }
 
     private static Path detectCurrentJdkPath() {
