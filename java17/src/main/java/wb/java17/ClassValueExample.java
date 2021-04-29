@@ -10,12 +10,29 @@ public class ClassValueExample {
 
         var time = Once.of(System::currentTimeMillis);
 
-        System.out.println(time.get(Object.class));
+        System.out.println(time.get());
         TimeUnit.MILLISECONDS.sleep(100);
-        System.out.println(time.get(Object.class));
+        System.out.println(time.get());
+
+
+        var result = Once.of(type ->
+                switch (type.getSimpleName()) {
+                    case "Integer":
+                        yield 1;
+                    case "Double":
+                        yield 2;
+                    default:
+                        yield 3;
+                });
+
+        System.out.println(result.get(Integer.class));
+        System.out.println(result.get(Integer.class));
     }
 
     static class Once<T> extends ClassValue<T> {
+
+        static final class Any {
+        }
 
         private final Function<Class<?>, T> creator;
 
@@ -26,6 +43,10 @@ public class ClassValueExample {
         @Override
         protected T computeValue(Class<?> type) {
             return creator.apply(type);
+        }
+
+        public T get() {
+            return get(Any.class);
         }
 
         public static <T> Once<T> of(Function<Class<?>, T> creator) {
