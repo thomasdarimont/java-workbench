@@ -76,8 +76,7 @@ public class MainMethodFinder {
             MainMethodReportingVisitor visitor = new MainMethodReportingVisitor();
             Files.walkFileTree(jdkHomePath, visitor);
 
-            List<MainMethod> mainMethods = visitor.waitForCompletionAndReturnMainMethods();
-            mainMethods.forEach(mainMethod -> {
+            Consumer<MainMethod> printMainMethodInfo = mainMethod -> {
 
                 String libraryFileName = mainMethod.library.getName();
                 if (libraryFileName.endsWith(".jar") && !libraryFileName.equals("rt.jar")) {
@@ -87,14 +86,15 @@ public class MainMethodFinder {
                 String libraryName = libraryFileName.replaceAll("\\.jmod", "");
 
                 if (SHOW_COMMAND) {
-
                     String launchCommand = generateLaunchCommand(!customJdkPathProvided, jdkHomePath, libraryFileName, mainClassName, libraryName);
-
                     System.out.printf("%s%n", launchCommand);
                 } else {
                     System.out.printf("%s %s%n", libraryName, mainClassName);
                 }
-            });
+            };
+
+            var mainMethods = visitor.waitForCompletionAndReturnMainMethods();
+            mainMethods.forEach(printMainMethodInfo);
         } finally {
             time = System.nanoTime() - time;
             if (VERBOSE) {
@@ -106,12 +106,11 @@ public class MainMethodFinder {
 
     private static String generateLaunchCommand(boolean useCurrentJdk, Path jdkHomePath, String libraryFileName, String mainClassName, String libraryName) {
 
-        String launchCommand =  (useCurrentJdk ? "" : jdkHomePath.toFile().getAbsolutePath() + "/bin/") + "java";
+        var launchCommand = (useCurrentJdk ? "" : jdkHomePath.toFile().getAbsolutePath() + "/bin/") + "java";
 
         if (libraryFileName.endsWith(".jmod")) {
             launchCommand += (useCurrentJdk ? "" : " --module-path " + jdkHomePath.toFile().getAbsolutePath() + "/jmods");
             launchCommand += " -m " + libraryName + "/" + mainClassName;
-
         } else if (libraryFileName.endsWith(".jar")) {
             launchCommand += " -cp " + jdkHomePath.toFile().getAbsolutePath() + "/" + libraryFileName;
             launchCommand += " " + mainClassName;
@@ -170,11 +169,14 @@ public class MainMethodFinder {
 
         private void scanLibraryForMainClasses(File library) {
             // Using FileSystems.newFileSystem(library.toPath(), (ClassLoader)null) for Java 11 compatibility
-            try (var fileSystem = FileSystems.newFileSystem(library.toPath(), (ClassLoader) null)) {
-                var root = fileSystem.getRootDirectories().iterator().next();
-                var visitor = new MainMethodVisitor(library, mainMethods::add, fileSystem);
-                Files.walk(root).parallel().filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
-            } catch (IOException e) {
+            try {
+                try (var fileSystem = FileSystems.newFileSystem(library.toPath(), (ClassLoader) null)) {
+                    var root = fileSystem.getRootDirectories().iterator().next();
+                    var visitor = new MainMethodVisitor(library, mainMethods::add, fileSystem);
+                    Files.walk(root).parallel().filter(this::isClassFile).forEach(visitor::scanClassForMainMethod);
+                }
+            } catch (Exception e) {
+                System.err.println("Could not scan library: " + library.getAbsolutePath());
                 e.printStackTrace();
             }
         }
