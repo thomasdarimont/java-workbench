@@ -79,8 +79,8 @@ public class MainMethodFinder {
             Consumer<MainMethod> printMainMethodInfo = mainMethod -> {
 
                 String libraryFileName = mainMethod.library.getName();
-                if (libraryFileName.endsWith(".jar") && !libraryFileName.equals("rt.jar")) {
-                    libraryFileName = "lib/" + libraryFileName;
+                if (libraryFileName.endsWith(".jar")) {
+                    libraryFileName = jdkHomePath.relativize(mainMethod.library.toPath()).toString();
                 }
                 String mainClassName = mainMethod.className;
                 String libraryName = libraryFileName.replaceAll("\\.jmod", "");
