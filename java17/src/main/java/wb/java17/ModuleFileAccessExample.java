@@ -17,11 +17,7 @@ public class ModuleFileAccessExample {
 
     public static void main(String[] args) throws Exception {
 
-        Map<String, String> env = new HashMap<>();
-        // set java.home property to be underlying java.home
-        // so that jrt-fs.jar loading is exercised.
-        env.put("java.home", System.getProperty("java.home"));
-        FileSystem fs = FileSystems.newFileSystem(URI.create("jrt:/"), env);
+        FileSystem fs = FileSystems.getFileSystem(URI.create("jrt:/"));
 
         fs.getRootDirectories().forEach(rootPath -> {
 
