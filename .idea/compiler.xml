@@ -22,20 +22,19 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="java-loom" target="16" />
+      <module name="java-loom" target="17" />
       <module name="java-panama" target="16" />
       <module name="java-workbench" target="15" />
       <module name="java11" target="11" />
       <module name="java15" target="15" />
       <module name="java17" target="17" />
       <module name="java8" target="1.8" />
-      <module name="lib-bytebuddy" target="15" />
       <module name="lib-graalvm-js" target="14" />
       <module name="lib-jabel" target="8" />
       <module name="lib-junit5-lab" target="17" />
       <module name="lib-testcontainers" target="15" />
       <module name="lib-tink" target="15" />
-      <module name="tool-jmc-lab" target="16" />
+      <module name="tool-jmc-lab" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

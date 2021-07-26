@@ -10,7 +10,7 @@
             <os>linux</os>
         </provides>
         <configuration>
-            <jdkHome>${env.HOME}/.sdkman/candidates/java/8.0.282.hs-adpt</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/8.0.292.hs-adpt</jdkHome>
         </configuration>
     </toolchain>
 
@@ -22,7 +22,7 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>${env.HOME}/.sdkman/candidates/java/11.0.10.hs-adpt</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/11.0.11.hs-adpt</jdkHome>
         </configuration>
     </toolchain>
 
@@ -70,7 +70,19 @@
             <os>Linux</os>
         </provides>
         <configuration>
-            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.19-open</jdkHome>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/17.ea.32-open</jdkHome>
+        </configuration>
+    </toolchain>
+
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>18-open</version>
+            <vendor>OpenJDK</vendor>
+            <os>Linux</os>
+        </provides>
+        <configuration>
+            <jdkHome>${env.HOME}/.sdkman/candidates/java/18.ea.7-open</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>

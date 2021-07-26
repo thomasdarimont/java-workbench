@@ -1,5 +1,6 @@
 package wb.junit5.threads;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -9,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 @ExtendWith(DetectDanglingThreadsExtension.class)
+@Disabled
 public class DanglingThreadsExampleTest {
 
     @Test
