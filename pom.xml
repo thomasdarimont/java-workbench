@@ -25,6 +25,7 @@
         <module>java17</module>
         <module>lib-testcontainers</module>
         <module>tool-jmc-lab</module>
+        <module>java18</module>
     </modules>
 
     <properties>
